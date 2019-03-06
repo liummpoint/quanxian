@@ -68,44 +68,41 @@
     <title>发现</title>
 </head>
 <body>
-<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 发现页管理 <span
-        class="c-gray en">&gt;</span> banner <a class="btn btn-success radius r"
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 产品管理 <span
+        class="c-gray en">&gt;</span> 产品管理 <a class="btn btn-success radius r"
                                                 style="line-height:1.6em;margin-top:3px"
                                                 href="javascript:location.replace(location.href);" title="刷新"><i
         class="Hui-iconfont">&#xe68f;</i></a></nav>
 <div class="page-container">
-    <input type="hidden" name="activityType" id="activityType" value="0"/>
+    <input type="hidden" name="activityType" id="activityType" value="1"/>
     <div id="tab_demo" class="HuiTab">
 
-        <div class="tabBar clearfix"><span>首页banner</span><span>发现页banner</span></div>
+        <div class="tabBar clearfix"><span>运营商积分</span><span>信用卡积分</span><span>申请信用卡</span></div>
         APP已上线数量：<b id="number1">0</b>&nbsp;&nbsp;&nbsp;预计上线数量：<b id="number2">0</b>&nbsp;&nbsp;&nbsp;<button
             class="btn btn-primary radius" onclick="insert()"> 新增
     </button>
-
+        <input type="text" id="creator" name="creator" class="input-text radius size-L"
+               value='${sessionScope.user.userName}' hidden="true"
+               style="height: 30px;width: 300px;border-radius:2px;">
         <div class="tabCon">
 
-            <input type="text" id="creator" name="creator" class="input-text radius size-L"
-                   value='${sessionScope.user.userName}' hidden="true"
-                   style="height: 30px;width: 300px;border-radius:2px;">
             <div class="mt-20">
-
                 <table id="table0" align="center"
                        class="table table-border table-bordered table-hover table-bg table-sort">
                     <thead>
                     <tr>
                         <th height="20" nowrap="nowrap">序号</th>
-                        <th nowrap="nowrap" align="center" width="120px">后台上传时间</th>
-                        <th nowrap="nowrap" align="center" width="350px">图片</th>
+                        <th height="20" nowrap="nowrap">标题</th>
+                        <th nowrap="nowrap" align="center" width="120px">上传时间</th>
+                        <th nowrap="nowrap" align="center" width="100px">图片</th>
                         <th nowrap="nowrap" align="center" width="50px">状态</th>
                         <th nowrap="nowrap" align="center" width="100px">开始时间</th>
                         <th nowrap="nowrap" align="center" width="100px">结束时间</th>
-                        <th nowrap="nowrap" align="center" width="80px">位置操作</th>
-                        <th nowrap="nowrap" align="center" width="80px">状态操作</th>
+                        <th nowrap="nowrap" align="center" width="180px">操作</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
-
             </div>
         </div>
 
@@ -117,18 +114,39 @@
                     <thead>
                     <tr>
                         <th height="20" nowrap="nowrap">序号</th>
-                        <th nowrap="nowrap" align="center" width="120px">后台上传时间</th>
-                        <th nowrap="nowrap" align="center" width="350px">图片</th>
+                        <th height="20" nowrap="nowrap">标题</th>
+                        <th nowrap="nowrap" align="center" width="120px">上传时间</th>
+                        <th nowrap="nowrap" align="center" width="100px">图片</th>
                         <th nowrap="nowrap" align="center" width="50px">状态</th>
                         <th nowrap="nowrap" align="center" width="100px">开始时间</th>
                         <th nowrap="nowrap" align="center" width="100px">结束时间</th>
-                        <th nowrap="nowrap" align="center" width="80px">位置操作</th>
-                        <th nowrap="nowrap" align="center" width="80px">状态操作</th>
+                        <th nowrap="nowrap" align="center" width="180px">操作</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
 
+            </div>
+        </div>
+
+        <div class="tabCon">
+            <div class="mt-20">
+                <table id="table2" align="center"
+                       class="table table-border table-bordered table-hover table-bg table-sort">
+                    <thead>
+                    <tr>
+                        <th height="20" nowrap="nowrap">序号</th>
+                        <th height="20" nowrap="nowrap">标题</th>
+                        <th nowrap="nowrap" align="center" width="120px">上传时间</th>
+                        <th nowrap="nowrap" align="center" width="100px">图片</th>
+                        <th nowrap="nowrap" align="center" width="50px">状态</th>
+                        <th nowrap="nowrap" align="center" width="100px">开始时间</th>
+                        <th nowrap="nowrap" align="center" width="100px">结束时间</th>
+                        <th nowrap="nowrap" align="center" width="180px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -291,6 +309,9 @@
                     data: "id",//序号
                 },
                 {
+                    data: "title",//后台上传时间
+                },
+                {
                     data: "createTime",//后台上传时间
                 },
                 {
@@ -306,13 +327,8 @@
                     data: "endTime",//结束时间4
                 },
                 {
-                    "sWidth": "80px",
+                    "sWidth": "180px",
                     data: "",//字段名5
-                    "defaultContent": ""
-                },
-                {
-                    "sWidth": "80px",
-                    data: "",//字段名6
                     "defaultContent": ""
                 }
             ],
@@ -321,7 +337,7 @@
                 function (row, data, index) {
                     //不使用render，改用jquery文档操作呈现单元格
 //                    alert(data.downLoadUrl);
-                    $('td', row).eq(2).html('<img  src=' + data.downLoadUrl + ' width="350" height="100"/>');
+                    $('td', row).eq(3).html('<img  src=' + data.downLoadUrl + ' width="100" height="60"/>');
 
                     var status_str = "";
                     if (data.status == 0) {
@@ -331,16 +347,12 @@
                     } else if (data.status == 2) {
                         status_str = "待上线";
                     }
-                    $('td', row).eq(3).html(status_str);
+                    $('td', row).eq(4).html(status_str);
 
-                    var btnUP1 = '<a style="text-decoration:none;color: cornflowerblue;" class="ml-5" onClick="up(' + data.id + ')">上移' + '</a><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>';
-                    var btnEdit = '<a style="text-decoration:none;color: cornflowerblue;" onClick="down(' + data.id + ')" >下移</a>';
-
-
-                    $('td', row).eq(6).html(btnUP1 + btnEdit);
-
-                    var update = '<a style="text-decoration:none;color: cornflowerblue;" onClick="updateTitle(' + data.id + ',' + id + ')" >修改</a><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>'
-                    $('td', row).eq(7).html(update);
+                    var btnUP1 = '<a style="text-decoration:none;color: cornflowerblue;" class="ml-5" onClick="up(' + data.id + ')">上移' + '</a><span>&nbsp;&nbsp;&nbsp;</span>';
+                    var btnEdit = '<a style="text-decoration:none;color: cornflowerblue;" onClick="down(' + data.id + ')" >下移</a>&nbsp;&nbsp;&nbsp;';
+                    var update = '<a style="text-decoration:none;color: cornflowerblue;" onClick="updateTitle(' + data.id + ',' + id + ')" >修改</a><span>&nbsp;&nbsp;&nbsp;</span>'
+                    $('td', row).eq(7).html(btnUP1 + btnEdit+update);
 
 
                 },

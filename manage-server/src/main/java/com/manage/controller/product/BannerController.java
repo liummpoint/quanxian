@@ -38,8 +38,10 @@ public class BannerController {
 
             if (banner.getActivityType() == 0) {
                 banner.setType("0");
-            } else {
+            } else if(banner.getActivityType() == 1) {
                 banner.setType("1");
+            }else if(banner.getActivityType() == 2) {
+                banner.setType("2");
             }
             resultMsg = iBannerService.getBannerList(banner);
         } catch (Exception e) {

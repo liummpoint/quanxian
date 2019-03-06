@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+         http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task-3.1.xsd "
+>
+
+    <!--banner定时更新状态-->
+    <!--<bean id="bannerJob" class="com.manage.task.BannerJob"/>-->
+
+    <!--<task:scheduled-tasks>-->
+        <!--当日数据汇总每一个小时更新-->
+        <!--<task:scheduled ref="dataStatisticsJob" method="insertDataStatisticsJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--截止当日数据汇总每一个小时更新-->
+        <!--<task:scheduled ref="dataStatisticsJob" method="updateDataStatisticsSumJob" cron="0 0 0/1 * * ?"/>-->
+        <!--昨日的截止当日数据汇总  每一个小时更新-->
+        <!--<task:scheduled ref="dataStatisticsJob" method="updateYesterdayData" cron="0 0/7 * * * ?"/>-->
+
+        <!--插入当日账户余额每一个小时更新-->
+        <!--<task:scheduled ref="accountBanlanceJob" method="insertaccouBanlanceJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--渠道监测每一个小时更新-->
+        <!--<task:scheduled ref="channelJob" method="insertChannelJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--渠道统计每一个小时更新-->
+        <!--<task:scheduled ref="channelStatisticsJob" method="insertChannelStatisticsJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--加息券使用情况的定时任务，每小时整点跑一次-->
+        <!--<task:scheduled ref="interestRateCouponJob" method="selectInterestRateCouponJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--特权本金利息的定时任务，每小时整点跑一次-->
+        <!--<task:scheduled ref="privilegeGoldJob" method="selectPrivilegeGoldJob" cron="0 0 0/1 * * ?"/>-->
+
+        <!--在投分布定时任务  每小时更新一次-->
+        <!--<task:scheduled ref="investmentAllocationJob" method="insertInvestmentAllocationJob" cron="0 0 0/1 * * ?"/>-->
+        <!--签到统计，每天汇总一次-->
+        <!--<task:scheduled ref="signStatisticsJob" method="updateSignStatistics" cron="0 30 0 * * ?"/>-->
+        <!--流动性预测-->
+        <!--<task:scheduled ref="planEstimateJob" method="insertReportPlanEstimateJob" cron="0 30 3 * * ?"/>-->
+        <!--流动性预测-当前信息-->
+        <!--<task:scheduled ref="planEstimateJob" method="updateNowReportPlanEstimateJob" cron="0 0 0/1 * * ?"/>-->
+        <!--流动性预测-昨日信息-->
+        <!--<task:scheduled ref="planEstimateJob" method="updateYesterdayPlanEstimate" cron="0 0/7 * * * ?"/>-->
+        <!--财务报表 每小时更新一次-->
+        <!--<task:scheduled ref="dailyReportJob" method="insertDailyReportJob" cron="0 0 1 * * ?"/>-->
+        <!--财务报表更新提现增减额 每天凌晨一点更新一次-->
+        <!--<task:scheduled ref="dailyReportJob" method="updateDailyReportJob" cron="0 10 1 * * ?"/>-->
+        <!--热门活动更新状态 五分钟一次-->
+        <!--<task:scheduled ref="FindHotJob" method="updateStatus" cron="0 0/5 * * * ?"/>-->
+
+        <!--banner定时更新状态 五分钟一次-->
+        <!-- <task:scheduled ref="bannerJob" method="bannerUpdateStausJob" cron="0 0/5 * * * ?"/>-->
+         <!--公司动态更新状态 五分钟一次-->
+        <!--<task:scheduled ref="FindCompanyJob" method="updateStatus" cron="0 0/5 * * * ?"/>-->
+        <!--超级账户余额预警短信提醒 30分钟一次-->
+        <!--<task:scheduled ref="CapitalEstimateJob" method="superAccountSms" cron="0 0/30 * * * ?"/>-->
+        <!--红包账户余额预警短信提醒 60分钟一次-->
+        <!--<task:scheduled ref="CapitalEstimateJob" method="redAccountSms" cron="0 0 0/1 * * ?"/>-->
+        <!--新手大礼包报表数据 每天一次-->
+        <!--<task:scheduled ref="NoviceActivityReportJob" method="addNoviceActivityReprot" cron="0 30 0 * * ?"/>-->
+        <!--更新活动配置 每小时一次-->
+        <!--<task:scheduled ref="timedTaskJob" method="updateJob" cron="0 0 0/1 * * ?"/>-->
+        <!--渠道上下线 5分钟一次-->
+        <!--<task:scheduled ref="channelTimeJob" method="insertChannelTime" cron="0 0/5 * * * ?"/>-->
+
+        <!-- 产品截止投资金额 -->
+        <!--<task:scheduled ref="reportInvestGroupproJob" method="insertReportInvestGroupproJob" cron="0 0/9 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 * * ? "/>-->
+    <!--</task:scheduled-tasks>-->
+
+
+</beans>

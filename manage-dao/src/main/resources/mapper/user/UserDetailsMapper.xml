@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.user.UserDetailsMapper">
+    <resultMap id="BaseResultMap" type="com.manage.model.user.UserDetails">
+        <id column="id" property="id"/>
+        <result column="user_name" property="userName"/>
+        <result column="mobile" property="mobile"/>
+        <result column="sex" property="sex"/>
+        <result column="create_time" property="createTime"/>
+        <result column="age" property="age"/>
+        <result column="channel_name" property="channelName"/>
+
+
+        <result column="sign_no" property="signNo"/>
+        <result column="name" property="openAccountName"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="card_no" property="cardNo"/>
+        <result column="reservedMobile" property="reservedMobile"/>
+        <result column="id_no" property="idNo"/>
+        <result column="accountopeningTime" property="accountopeningTime"/>
+
+        <result column="totalAmount" property="totalAmount"/>
+        <result column="amount" property="amount"/>
+        <result column="accountBalance" property="accountBalance"/>
+        <result column="rechargeAmount" property="rechargeAmount"/>
+        <result column="cashAmount" property="cashAmount"/>
+        <result column="cashNum" property="cashNum"/>
+
+        <result column="noviceInvest" property="noviceInvest"/>
+        <result column="currentInvest" property="currentInvest"/>
+        <result column="interestTotal" property="interestTotal"/>
+
+
+    </resultMap>
+    <!--风险类型-->
+    <select id="selectRiskType" parameterType="java.lang.String" resultType="java.lang.String">
+        select risk_result FROM user_riskEvaluate WHERE user_id=#{id} ORDER BY update_time desc LIMIT 1
+
+    </select>
+    <select id="selectUserDetails" resultMap="BaseResultMap" parameterType="java.lang.String">
+     SELECT
+	user_name,
+	REPLACE(u.mobile, SUBSTR(u.mobile,4,4), '****') as mobile,
+	IFNULL(b.id_no ,'') id_no,
+	
+	IFNULL(ROUND(a.amount / 100,2),0) as accountBalance,
+    IFNULL(ROUND(interest_total / 100,2),0) interestTotal,
+	IFNULL(u.create_time,'无') create_time,
+	IFNULL(c.name,'无') channel_name,
+	IFNULL(c.remarks,'无') remarks,
+	c.parent_id parentId,
+	IFNULL(u.id,'无') id,
+    IFNULL(sign_no,'无')sign_no,
+    IFNULL(b.name,'无') name,
+    IFNULL(b.bank_name,0) bank_name,
+    REPLACE(b.card_no, SUBSTR(card_no,7,8), '****') as card_no ,
+    REPLACE(b.mobile, SUBSTR(b.mobile,4,4), '****') as reservedMobile,
+    b.create_time as accountopeningTime
+
+    FROM
+    `user` u
+    LEFT JOIN bank_card b on  u.id = b.user_id
+    LEFT JOIN account a on a.user_id=u.id
+    LEFT JOIN channel_dictionary c on c.id=u.channel_id
+    where u.id=#{id} and u.is_deleted=0
+    and a.account_type=1
+    and a.is_deleted=0  and b.is_deleted=0
+    </select>
+
+    <!--总账户余额-->
+    <select id="selectTotalAccountBalance" parameterType="java.lang.String" resultType="java.lang.String">
+        select IFNULL(ROUND( (interest_actual + amount)/100,2),0) from account where user_id= #{id}
+    </select>
+    <!--查询一级渠道-->
+    <select id="selectParentChannel" parameterType="java.lang.String" resultType="java.lang.String">
+        select remarks from channel_dictionary where id=#{parentId}
+    </select>
+    <select id="selectParentChannelDetails" parameterType="java.lang.String" resultType="com.manage.model.user.UserDetails">
+        select id,remarks channelName from channel_dictionary where id=#{parentId}
+    </select>
+    <select id="selectNoInvestUserDetails" resultMap="BaseResultMap" parameterType="java.lang.String">
+       SELECT
+	user_name,
+	REPLACE (
+		u.mobile,
+		SUBSTR(u.mobile, 4, 4),
+		'****'
+	) AS mobile,
+  IFNULL(u.create_time, '无') create_time,
+	IFNULL(c.name,'无') channel_name,
+	IFNULL(c.remarks,'无') remarks,
+	IFNULL(u.id, '无') id,
+	c.parent_id parentId
+
+FROM
+	`user` u
+
+LEFT JOIN channel_dictionary c ON c.id = u.channel_id
+WHERE
+	u.id=#{id}
+AND u.is_deleted = 0
+    </select>
+
+    <select id="selectreCashAndChargeAmount" resultMap="BaseResultMap" parameterType="java.lang.String">
+	SELECT
+	   IFNULL(ROUND(SUM(case when transaction_type=0 then amount else 0 end )/100,2),0) as  rechargeAmount,
+       IFNULL(ROUND(SUM(case when transaction_type=1 then amount else 0 end )/100,2),0) as  cashAmount,
+       IFNULL(sum(case when transaction_type=1 then 1 else 0 end ),0)  as  cashNum
+    FROM
+	    transaction_plan
+    WHERE
+	    user_id =#{id}
+        and status=1
+        AND is_deleted = 0
+	</select>
+
+    <select id="selectTotalAmount" parameterType="java.lang.String" resultType="java.lang.String">
+    SELECT
+	 IFNULL(ROUND(((
+			SELECT
+				IFNULL(sum(total_amount),0)
+			FROM
+				invest_plan
+			WHERE
+				user_id = #{id}
+				and is_deleted=0
+		)+(
+
+			SELECT
+				IFNULL(sum(total_amount) ,0)
+			FROM
+				invest
+			WHERE
+			    is_deleted=0
+			    and
+				user_id=#{id}
+
+		))/100,2),0)
+	AS totalAmount
+
+    </select>
+    <select id="selectAmount" parameterType="java.lang.String" resultType="java.lang.String">
+        SELECT
+	IFNULL( ROUND(((
+			SELECT
+				IFNULL(sum(amount),0)
+			FROM
+				invest_plan
+			WHERE
+				user_id = #{id}
+                and is_deleted=0
+                and `status` in(0,1,3)
+		)+(
+
+			SELECT
+				IFNULL(sum(amount) ,0)
+			FROM
+				invest
+			WHERE
+				user_id=#{id}
+                and is_deleted=0
+                and `status` in(0,1,3)
+		))/100,2),0)
+	AS amount
+
+    </select>
+
+
+    <select id="selectNoviceAndCurrent" parameterType="java.lang.String" resultMap="BaseResultMap">
+	SELECT
+	IFNULL( ROUND(SUM(case when TYPE = 2 then amount else 0 end)/100,2),0) as noviceInvest,
+	IFNULL( ROUND(SUM(case when TYPE = 1 then amount else 0 end)/100,2),0) as currentInvest
+	FROM
+	invest
+	WHERE
+
+	is_deleted = 0
+	AND user_id = #{id}
+</select>
+    <select id="selectTotolNoviceAndCurrent" parameterType="java.lang.String" resultMap="BaseResultMap">
+		SELECT
+		IFNULL( ROUND(SUM(total_amount)/100,2),0) as currentInvest
+		FROM
+		invest
+		WHERE is_deleted = 0
+		and type = 1
+		AND user_id = #{id}
+	</select>
+    <select id="selectRegular" parameterType="java.lang.String" resultType="com.manage.model.user.UserDetails">
+	SELECT
+	IFNULL( ROUND(SUM(case when back_type=0 then amount ELSE 0 end)/100,2),0) as regularInvest,
+    IFNULL( ROUND(SUM(case when back_type=4 then amount ELSE 0 end)/100,2),0) as marchInvest,
+    IFNULL( ROUND(SUM(case when back_type=5 then amount ELSE 0 end)/100,2),0) as JuneInvest,
+    IFNULL( ROUND(SUM(case when back_type=6 then amount ELSE 0 end)/100,2),0) as twelveInvest
+    FROM
+	invest_plan ip
+    INNER JOIN product_config pc ON ip.product_id = pc.id
+    WHERE
+	ip.is_deleted = 0
+    and pc.is_deleted = 0
+    AND user_id = #{id}
+	</select>
+    <select id="selectTotalRegular" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT
+		IFNULL( ROUND(SUM(total_amount)/100,2),0) as regularInvest
+		FROM
+		invest_plan
+		WHERE
+		is_deleted = 0
+		AND user_id = #{id}
+	</select>
+
+    <select id="selectTransferAmount" parameterType="java.lang.String" resultType="java.lang.String">
+	  SELECT
+      IFNULL(ROUND(sum(amount)/100,2),0)
+      FROM
+	  finance_product t
+      WHERE
+	  t.`product_type` = 1
+      and t.is_completed in(0,1)
+      AND t.`is_deleted` = 0
+      and `org_Id` IS NULL
+      AND t.`status` = 7
+      and invest_type = 0
+      and user_id=#{id}
+	</select>
+    <select id="selectMatchingAmount" parameterType="java.lang.String" resultType="java.lang.String">
+	  SELECT
+	  IFNULL(ROUND(SUM(amount)/100,2),0) matchingAmount
+      FROM
+	  (SELECT
+	  SUM(t.`unmatched_amount`) amount
+	  FROM
+	  invest t
+	  WHERE
+	  t.`is_deleted` = 0
+	  AND t.`status` = 3
+	  AND user_id = #{id}
+	  UNION ALL
+	  SELECT
+	  SUM(t.`unmatched_amount`) amount
+	  FROM
+	  invest_plan t
+	  WHERE
+	  t.`is_deleted` = 0
+	  AND t.`status` = 3
+	  AND user_id = #{id}
+	  ) tt
+	</select>
+    <!--定期 安心 投资金额-->
+    <select id="getPlanTotalAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT
+        IFNULL(ROUND(SUM(t.total_amount)/100,2),0) investamount
+        FROM
+        invest_plan t
+        INNER JOIN product_config p ON t.product_id = p.id
+        WHERE
+        1 = 1
+        AND t.is_deleted = 0
+        AND p.is_deleted = 0
+        <if test="id != null and id!='' ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and p.back_type=#{type}
+        </if>
+    </select>
+    <!--活期投资金额-->
+    <select id="getCurrentTotleAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(SUM(t.total_amount)/100,2),0) investamount
+        FROM invest t WHERE 1=1
+        and t.is_deleted=0
+        <if test="id != null and id!='' ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and t.type=#{type}
+        </if>
+    </select>
+    <!--新手投资金额-->
+    <select id="getNoviceTotleAmount" parameterType="java.lang.String"
+            resultType="java.lang.String">
+        select sum(investamount)from(SELECT
+        IFNULL(
+        ROUND(SUM(t.total_amount) / 100, 2),
+        0
+        ) investamount
+        FROM
+        invest t
+        WHERE
+        1 = 1
+        AND t.is_deleted = 0
+        and t.type=2
+        <if test="_parameter != null and _parameter!='' ">
+            AND t.user_id= #{id}
+        </if>
+        union
+        SELECT
+        IFNULL(
+        ROUND(SUM(t.total_amount) / 100, 2),
+        0
+        ) investamount
+        FROM
+        invest_plan t
+        WHERE
+        1 = 1
+        AND t.is_deleted = 0
+        and t.type=2
+        <if test="_parameter != null and _parameter!='' ">
+            AND t.user_id= #{id}
+        </if>)aa
+    </select>
+    <!--定期 安心 在投金额-->
+    <select id="getPlanAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT
+        IFNULL(ROUND(SUM(t.amount)/100,2),0) amount
+        FROM
+        invest_plan t
+        INNER JOIN product_config p ON t.product_id = p.id
+        WHERE
+        1 = 1
+        AND t.is_deleted = 0
+        AND p.is_deleted = 0
+        and t.`status` in(0,1)
+        <if test="id != null  ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null ">
+            and p.back_type=#{type}
+        </if>
+    </select>
+    <!--活期在投金额-->
+    <select id="getCurrentAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(SUM(t.amount)/100,2),0) investamount
+        FROM invest t WHERE 1=1
+        and t.is_deleted=0
+        <if test="id != null and id!='' ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and t.type=#{type}
+        </if>
+    </select>
+    <!--新手在投金额-->
+    <select id="getNoviceAmount" parameterType="java.lang.String"
+            resultType="java.lang.String">
+        select sum(investamount) from (SELECT IFNULL(ROUND(SUM(t.amount)/100,2),0) investamount
+        FROM invest t WHERE 1=1
+        and t.is_deleted=0
+        <if test="_parameter != null and _parameter!='' ">
+            AND t.user_id = #{id}
+        </if>
+            and t.type=2
+       union
+        SELECT IFNULL(ROUND(SUM(t.amount)/100,2),0) investamount
+        FROM invest_plan t WHERE 1=1
+        and t.is_deleted=0
+        <if test="_parameter != null and _parameter!='' ">
+            AND t.user_id = #{id}
+        </if>
+        and t.type=2)qq
+    </select>
+    <!--定期 安心 匹配中金额-->
+    <select id="getPlanMatchingAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT
+        IFNULL(ROUND(SUM(t.unmatched_amount)/100,2),0) investamount
+        FROM
+        invest_plan t
+        INNER JOIN product_config p ON t.product_id = p.id
+        WHERE
+        1 = 1
+        AND t.is_deleted = 0
+        AND p.is_deleted = 0
+        AND t.`status` = 3
+        <if test="id != null and id!='' ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and p.back_type=#{type}
+        </if>
+    </select>
+    <!--活期 新手匹配中金额-->
+    <select id="getCurrentMatchingAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(SUM(t.amount)/100,2),0) investamount
+        FROM invest t WHERE 1=1
+        and t.is_deleted=0
+        AND t.`status` = 3
+        <if test="id != null and id!='' ">
+            AND t.user_id = #{id}
+        </if>
+        <if test="type != null   ">
+            and t.type=#{type}
+        </if>
+    </select>
+    <!--活期 新手收益-->
+    <select id="getCurrentInterest" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(SUM(interest)/100,2),0)
+        from invest_interest
+        where 1=1
+        and is_deleted = 0
+        <if test="id != null and id!='' ">
+            AND user_id = #{id}
+        </if>
+        <if test="type != null   ">
+            and type=#{type}
+        </if>
+    </select>
+    <!--定期 安心收益-->
+    <select id="getPlanInterest" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(SUM(interest)/100,2),0)
+        from invest_interest_plan tt
+        INNER JOIN invest_plan tt1 on tt.invest_id=tt1.id
+        INNER JOIN product_config p on tt1.product_id = p.id
+        where tt.is_deleted = 0
+        AND tt1.is_deleted = 0
+        AND p.is_deleted = 0
+        <if test="id != null and id!='' ">
+            AND tt.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and back_type= #{type}
+        </if>
+    </select>
+    <!--定期 安心转出中金额-->
+    <select id="getPlanTransferAmount" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(sum(tt.amount)/100,2),0)
+        from finance_product tt
+        INNER JOIN invest_plan tt1 on tt.invest_id=tt1.id
+        INNER JOIN product_config p on tt1.product_id = p.id
+        where
+        tt.is_deleted=0
+        and tt1.is_deleted=0
+        and p.is_deleted=0
+        and tt.is_completed in(0,1)
+        and tt.invest_type=1
+        <if test="id != null and id!='' ">
+            AND tt.user_id = #{id}
+        </if>
+        <if test="type != null  ">
+            and back_type= #{type}
+        </if>
+    </select>
+
+    <!--定期 花生转出中金额-->
+    <select id="getTransferAmount" parameterType="java.lang.String"
+            resultType="java.lang.String">
+        SELECT IFNULL(ROUND(sum(tt.amount)/100,2),0)
+        from finance_product tt
+        where
+        tt.is_deleted=0
+        and tt.is_completed in(0,1)
+        and tt.invest_type=0
+        <if test="_parameter != null and _parameter!='' ">
+            AND tt.user_id = #{id}
+        </if>
+
+    </select>
+    <!--活期首投时间-->
+    <select id="getFirstInvestTime" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT
+        create_time
+        FROM
+        invest
+        where
+        is_deleted=0
+        <if test="type != null  ">
+            and type=#{type}
+        </if>
+        <if test="id != null and id!='' ">
+            AND user_id = #{id}
+        </if>
+        ORDER BY create_time
+        limit 1
+    </select>
+    <!--新手首投时间-->
+    <select id="getFirstNoviceInvestTime" parameterType="java.lang.String"
+            resultType="java.lang.String">
+        SELECT
+        create_time
+        FROM
+        invest
+        WHERE
+        is_deleted = 0
+        AND type =2
+        <if test="_parameter != null and _parameter!='' ">
+            AND user_id = #{id}
+        </if>
+        union
+        SELECT
+        create_time
+        FROM
+        invest_plan
+        WHERE
+        is_deleted = 0
+        AND type =2
+        <if test="_parameter != null and _parameter!='' ">
+            AND user_id = #{id}
+        </if>
+    </select>
+    <!--定期 安心首投时间-->
+    <select id="getPlanFirstInvestTime" parameterType="com.manage.model.user.UserDetailsList"
+            resultType="java.lang.String">
+        SELECT tt.create_time
+        FROM
+        invest_plan tt
+        INNER JOIN product_config p on tt.product_id = p.id
+        where
+        tt.is_deleted=0
+        and p.is_deleted=0
+        <if test="id != null and id!='' ">
+            and user_id= #{id}
+        </if>
+        <if test="type != null  ">
+            and back_type=#{type}
+        </if>
+        ORDER BY tt.create_time
+        limit 1
+    </select>
+    <select id="getUserRisk" parameterType="java.lang.String"  resultType="com.manage.model.user.UserRisk">
+         SELECT
+	     DATE_FORMAT(u.create_time,'%Y-%m-%d') as createTime,u.fraction as score,u.risk_result as riskType,s.value as productType
+         FROM
+	     `user_riskEvaluate`u LEFT JOIN sys_dictionary s on u.product_join=s.dic_code
+         WHERE
+	     user_id = #{id}
+         ORDER BY u.update_time desc
+    </select>
+    
+    <select id="selectChannel" parameterType="java.lang.String" resultType="java.util.Map">
+       SELECT channel_dictionary.remarks destRemark ,channel_dictionary.id destId ,c.`name` sourceName ,c.`level` sourceLevel,c.remarks sourceRemarks
+		FROM (select * FROM channel_dictionary where id = #{channelId} ) c
+		left join channel_dictionary  
+		ON channel_dictionary.id = c.parent_id	
+    </select>
+</mapper>

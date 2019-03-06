@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.user.BankCardMapper">
+    <resultMap id="BaseResultMap" type="com.manage.model.user.BankCard">
+        <id column="user_id" jdbcType="VARCHAR" property="id"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="name" jdbcType="VARCHAR" property="userName"/>
+        <result column="mobile" jdbcType="VARCHAR" property="userMobile"/>
+        <result column="id_no" jdbcType="VARCHAR" property="idNo"/>
+        <result column="sign_no" jdbcType="VARCHAR" property="signNo"/>
+        <result column="bank_name" jdbcType="VARCHAR" property="bankName"/>
+        <result column="card_no" jdbcType="VARCHAR" property="cardNo"/>
+        <result column="mobile" jdbcType="VARCHAR" property="mobile"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <!--private String userName;//姓名
+    private String userMobile;//手机号
+    private String idNo;//身份证号
+    private String signNo;//签约账号
+    private String bankName;//银行名称
+    private String cardNo;//银行卡号
+    private String mobile;//预留手机号
+    private int status;//状态
+    private String createTime;//绑定时间-->
+    
+    <select id="selectBankCard" parameterType="com.manage.model.user.BankCard"
+            resultType="com.manage.model.user.BankCard">
+        select b.name AS  userName,a.mobile AS userMobile,b.id_no,c.sign_no,b.bank_name,b.card_no,b.mobile AS
+        mobile,b.account_id,b.status,DATE_FORMAT(b.create_time,'%Y-%m-%d %H:%I:%S') create_time,b.id AS id
+        FROM user a INNER JOIN bank_card b ON a.id=b.user_id
+        INNER JOIN account c ON a.id=c.user_id WHERE
+        c.account_type = 1
+        <if test="signNo !=null and signNo !=''">
+            and c.sign_no = #{signNo}
+        </if>
+        <if test="userMobile !=null and userMobile !=''">
+            and a.mobile = #{userMobile}
+        </if>
+    </select>
+    <select id="selectBankCardInfo" resultType="com.manage.model.user.BankCard" parameterType="com.manage.model.user.BankCard">
+         SELECT  bank_name AS bankName,card_no AS cardNo,mobile AS mobile ,id_no AS idNo ,name AS userName from bank_card
+         WHERE id=#{id}
+    </select>
+    <update id="updateBankCard"  parameterType="com.manage.model.user.BankCard">
+        UPDATE bank_card
+        SET bank_name=#{bankName},
+        card_no=#{cardNo},
+        mobile=#{mobile},
+        id_no=#{idNo},
+        name=#{userName},
+        updator=#{updator}
+        WHERE id=#{id}
+    </update>
+
+    <select id="selectBankCardInfoByuserid" resultType="com.manage.model.user.BankCard" parameterType="java.lang.String">
+        SELECT  bank_name AS bankName,card_no AS cardNo,mobile AS mobile ,id_no AS idNo ,name AS userName from bank_card
+        WHERE is_deleted = 0 and user_id=#{userid}
+    </select>
+
+</mapper>

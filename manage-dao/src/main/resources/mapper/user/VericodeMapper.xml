@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.user.VericodeMapper">
+    <resultMap id="BaseResultMap" type="com.manage.model.user.VeriCode">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <id column="user_id" jdbcType="INTEGER" property="userid"/>
+        <result column="vericode" jdbcType="VARCHAR" property="vericode"/>
+        <result column="vericodeExpired" jdbcType="VARCHAR" property="vericodeExpired"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="is_deleted" jdbcType="INTEGER" property="isDeleted"/>
+    </resultMap>
+
+    <sql id="userManagerColumn">
+        id,user_id,vericode,vericodeExpired,create_time,is_deleted
+    </sql>
+
+
+    <insert id="addVericode" parameterType="com.manage.model.user.VeriCode">
+        INSERT INTO vericode(user_id,vericode,vericodeExpired)
+        values(#{userid},#{vericode},#{vericodeExpired})
+    </insert>
+
+    <select id="selectVericode" parameterType="com.manage.model.user.VeriCode" resultMap="BaseResultMap">
+        SELECT
+        user_id,vericode,id
+        FROM vericode
+        WHERE user_id=#{userid} AND is_deleted=0 AND vericodeExpired <![CDATA[ >= ]]> #{vericodeExpired} ORDER BY id DESC
+    </select>
+
+    <update id="updateVericode" parameterType="com.manage.model.user.VeriCode">
+        UPDATE vericode SET is_deleted=1
+        WHERE id=#{id}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.system.MenuManageMapper">
+
+    <resultMap id="BaseResultMap" type="com.manage.system.MenuManage">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="url" property="url"/>
+        <result column="sort" property="sort"/>
+        <result column="icon" property="icon"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="session_key" property="sessionKey"/>
+        <result column="type" property="type"/>
+        <result column="level" property="menuGrade"/>
+    </resultMap>
+
+
+    <select id="selectMenu" resultMap="BaseResultMap">
+    SELECT id,name,parent_id,session_key,url from menu_manage where is_deleted=0 order by sort desc
+  </select>
+    <select id="selectByParentId" resultMap="BaseResultMap">
+    SELECT id,name,url,parent_id,icon from menu_manage where is_deleted=0 and parent_id=#{parentId} order by sort desc
+  </select>
+
+    <select id="selectMenuAll" resultMap="BaseResultMap">
+        SELECT * from menu_manage where is_deleted=0
+        <if test="name != null and name != ''">
+            and name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+        </if>
+        <if test="parentId != null and parentId != ''">
+            and (parent_id = #{parentId}
+            or id=#{parentId})
+        </if>
+        order by parent_id,sort desc
+    </select>
+
+    <select id="selectMenuById" resultMap="BaseResultMap">
+        SELECT * from menu_manage where is_deleted=0 and id =#{id} order by sort desc
+    </select>
+    <update id="updateMenu" parameterType="com.manage.system.MenuManage">
+        update menu_manage
+        set name=#{name},url=#{url},sort=#{sort},icon=#{icon},parent_id=#{parentId},update_time=#{updateTime},session_key=#{sessionKey},type=#{type},level=#{menuGrade} where id=#{id}
+    </update>
+    <update id="delMenu" parameterType="java.lang.Integer">
+        update menu_manage
+        set is_deleted=1 where id=#{id}
+    </update>
+    <insert id="addMenu" parameterType="com.manage.system.MenuManage">
+        insert into menu_manage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                name,
+            </if>
+            <if test="url != null and url != ''">
+                url,
+            </if>
+            <if test="sort != null and sort != ''">
+                sort,
+            </if>
+            <if test="icon != null and icon != ''">
+                icon,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+
+            <if test="createTime != null and createTime != ''">
+                create_time,
+            </if>
+            <if test="sessionKey != null and sessionKey != ''">
+                session_key,
+            </if>
+            <if test="type != null and type != ''">
+                type,
+            </if>
+            <if test="menuGrade != null and menuGrade != ''">
+                level
+            </if>
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                #{name},
+            </if>
+            <if test="url != null and url != ''">
+                #{url},
+            </if>
+            <if test="sort != null and sort != ''">
+                #{sort},
+            </if>
+            <if test="icon != null and icon != ''">
+                #{icon},
+            </if>
+            <if test="parentId != null">
+                #{parentId},
+            </if>
+
+            <if test="createTime != null and createTime != ''">
+                #{createTime},
+            </if>
+            <if test="sessionKey != null and sessionKey != ''">
+                #{sessionKey},
+            </if>
+            <if test="type != null and type != ''">
+                #{type},
+            </if>
+            <if test="menuGrade != null and menuGrade != ''">
+                #{menuGrade}
+            </if>
+        </trim>
+    </insert>
+
+    <select id="selectMenuByUrl" resultMap="BaseResultMap"  parameterType="java.lang.String">
+        SELECT * from menu_manage where is_deleted=0 and url like CONCAT('%',#{url},'%') order by sort desc
+    </select>
+</mapper>

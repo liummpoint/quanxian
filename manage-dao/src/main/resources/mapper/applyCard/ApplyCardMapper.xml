@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.applyCard.ApplyCardMapper">
+    <!--<resultMap id="BaseResultMap" type="ApplyCard">
+        <id column="apply_card_id" jdbcType="INTEGER" property="applyCardId"/>
+        <result column="biz_user_id" jdbcType="INTEGER" property="bizUserId"/>
+        <result column="service_order_id" jdbcType="INTEGER" property="serviceOrderId"/>
+        <result column="product_activity_id" jdbcType="INTEGER" property="productActivityId"/>
+        <result column="apply_name" jdbcType="VARCHAR" property="applyName"/>
+        <result column="apply_id_card_no" jdbcType="VARCHAR" property="applyIdCardNo"/>
+        <result column="apply_phone" jdbcType="VARCHAR" property="applyPhone"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="create_time" jdbcType="Long" property="createTime"/>
+        <result column="update_time" jdbcType="Long" property="updateTime"/>
+    </resultMap>-->
+
+    <sql id="applyCardColumn">
+        apply_card_id,biz_user_id,service_order_id,product_activity_id,apply_name,
+        apply_id_card_no,apply_phone,status,create_time,update_time
+    </sql>
+    <select id="selectApplyCardList"  resultType="com.manage.model.applyCard.ApplyCard">
+        select  <include refid="applyCardColumn" />   from apply_card where is_deleted=0
+    </select>
+    <select id="selectApplyCardById"  parameterType="java.lang.Integer" resultType="com.manage.model.applyCard.ApplyCard">
+        select  <include refid="applyCardColumn" />   from apply_card where apply_card_id =#{applyCardId}
+    </select>
+    <update id="updateApplyCard" parameterType="com.manage.model.applyCard.ApplyCard">
+        update apply_card
+        SET
+        apply_name=#{applyName},apply_id_card_no=#{applyIdCardNo},
+        apply_phone=#{applyPhone},status=#{status},
+        update_time=#{updateTime}
+        WHERE apply_card_id=#{applyCardId}
+    </update>
+    <update id="deleteApplyCard" parameterType="com.manage.model.applyCard.ApplyCard">
+        update apply_card
+        SET
+        is_deleted=1
+        WHERE apply_card_id=#{applyCardId}
+    </update>
+
+    <insert id="insertApplyCard" parameterType="com.manage.model.applyCard.ApplyCard">
+        INSERT INTO apply_card( biz_user_id,service_order_id,product_activity_id,apply_name,apply_id_card_no,apply_phone,status,create_time,update_time)
+        values(#{bizUserId},#{serviceOrderId}, #{productActivityId},#{applyName},#{applyIdCardNo},#{applyPhone},#{status},#{createTime},#{updateTime})
+    </insert>
+
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.transaction.TransactionMapper">
+
+
+    <sql id="transactionColumn">
+        transaction_id,service_order_id,biz_user_id,amount,transaction_type,
+        status,create_time,update_time
+    </sql>
+    <select id="selectTransactionList"  resultType="com.manage.model.transaction.Transaction">
+        select  <include refid="transactionColumn" />   from transaction where is_deleted=0
+    </select>
+    <select id="selectTransactionById"  parameterType="java.lang.Integer" resultType="com.manage.model.transaction.Transaction">
+        select  <include refid="transactionColumn" />   from transaction where transaction_id =#{transactionId}
+    </select>
+    <update id="deleteTransaction" parameterType="com.manage.model.transaction.Transaction">
+        update transaction
+        SET
+        is_deleted=1
+        WHERE transaction_id=#{transactionId}
+    </update>
+
+    <insert id="insertTransaction" parameterType="com.manage.model.transaction.Transaction">
+        INSERT INTO transaction( service_order_id,biz_user_id,amount,transaction_type,status,create_time,update_time)
+        values(#{serviceOrderId},#{bizUserId},#{amount},#{transactionType},#{status},#{createTime},#{updateTime})
+    </insert>
+
+</mapper>

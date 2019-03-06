@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.bizUser.BizUserMapper">
+
+
+    <sql id="bizUserColumn">
+        biz_user_id,biz_user_name,type,cellphone,password,
+        status,parent_biz_user_id,grade,order_statistics,pre_distribute_fee,finish_distribute_fee,is_deleted,create_time,update_time
+    </sql>
+    <select id="selectBizUserList"  resultType="com.manage.model.bizUser.BizUser">
+        select  <include refid="bizUserColumn" />   from biz_user where is_deleted=0
+    </select>
+    <select id="selectBizUserById"  parameterType="java.lang.Integer" resultType="com.manage.model.bizUser.BizUser">
+        select  <include refid="bizUserColumn" />   from biz_user where biz_user_id =#{bizUserId}
+    </select>
+    <update id="updateBizUser" parameterType="com.manage.model.bizUser.BizUser">
+        update biz_user
+        SET
+        biz_user_name=#{realname},cellphone=#{idCardNo},update_time=#{updateTime}
+        WHERE biz_user_id=#{bizUserId}
+    </update>
+    <update id="deleteBizUser" parameterType="com.manage.model.bizUser.BizUser">
+        update biz_user
+        SET
+        is_deleted=1
+        WHERE biz_user_id=#{bizUserId}
+    </update>
+
+    <insert id="insertBizUser" parameterType="com.manage.model.bizUser.BizUser">
+        INSERT INTO biz_user( biz_user_id,biz_user_name,type,cellphone,password,
+        status,parent_biz_user_id,grade,order_statistics,pre_distribute_fee,finish_distribute_fee,is_deleted,create_time,update_time)
+        values(#{bizUserId},#{bizUserName}, #{type},#{cellphone},#{password},#{status},#{parentBizUserId},#{grade},#{orderStatistics},#{preDistributeFee},#{finishDistributeFee},#{isDeleted},#{createTime},#{updateTime})
+    </insert>
+
+</mapper>

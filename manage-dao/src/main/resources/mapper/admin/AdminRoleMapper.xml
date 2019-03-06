@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.admin.AdminRoleMapper">
+    <resultMap id="BaseResultMap" type="com.manage.model.admin.AdminRole">
+        <id column="role_id" property="roleId"/>
+        <result column="role_name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="website_role" jdbcType="VARCHAR" property="websiteRole"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="is_delete" jdbcType="TINYINT" property="isDelete"/>
+        <result column="user_name" property="userList"/>
+    </resultMap>
+
+
+    <sql id="findAdminRoleCondition">
+        where is_delete=1
+        <if test="roleName != null and roleName!='' ">
+            AND role_name = #{roleName}
+        </if>
+
+        <if test="remark != null and remark != ''">
+            AND remark = #{remark}
+        </if>
+        <if test="websiteRole != null and websiteRole == 'top'">
+            AND (website_role is null or websiteRole='')
+        </if>
+
+        <if test="createTime != null and createTime != ''">
+            AND create_time = #{createTime}
+        </if>
+        <if test="updateTime != null and updateTime != ''">
+            AND update_time = #{updateTime}
+        </if>
+
+    </sql>
+
+
+    <sql id="Role_Column_List">
+    role_id,role_name,remark,website_role,create_time,update_time,is_delete
+  </sql>
+
+    <select id="selectAllAdminRole" resultMap="BaseResultMap">
+
+
+    SELECT
+    a.role_id,a.role_name,a.remark,a.website_role,a.create_time,a.update_time,a.is_delete,GROUP_CONCAT(u.user_name) as userList
+    FROM
+    role_manage a
+    LEFT JOIN
+    user_manager u
+    on  a.role_id=u.role_id
+    where is_delete= 1
+    GROUP BY a.role_id
+
+  </select>
+
+    <select id="selectAdminRoleById" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Role_Column_List"/>
+        from role_manage
+        where role_id=#{roleId}
+    </select>
+
+    <select id="selectAdminRole" resultMap="BaseResultMap" parameterType="com.manage.model.admin.AdminRole">
+        SELECT
+        <include refid="Role_Column_List"/>
+        from role_manage
+        <include refid="findAdminRoleCondition"/>
+
+    </select>
+
+
+    <insert id="insertAdminRole" parameterType="com.manage.model.admin.AdminRole">
+    insert into role_manage(role_name,remark,website_role)VALUES (
+    #{roleName},#{remark},#{websiteRole}
+    )
+  </insert>
+
+
+    <update id="deleteAdminRoleById" parameterType="com.manage.model.admin.AdminRole">
+    update
+    role_manage
+    SET is_delete= 0
+    where role_id=#{roleId}
+  </update>
+
+    <update id="updateAdminRole" parameterType="com.manage.model.admin.AdminRole">
+    update
+    role_manage
+    SET role_name=#{roleName},
+    remark=#{remark},
+    website_role=#{websiteRole}
+    where role_id=#{roleId}
+  </update>
+
+</mapper>

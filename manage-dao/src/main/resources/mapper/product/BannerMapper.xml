@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.product.BannerMapper">
+
+
+
+	<select id="selectBannerList"  resultType="com.manage.model.product.Banner" parameterType="com.manage.model.product.Banner">
+		SELECT id ,jump_url as JumpUrl ,title,subTitle ,image_url AS imageUrl ,DATE_FORMAT(create_time,'%Y-%m-%d %k:%i') as createTime,DATE_FORMAT(start_time,'%Y-%m-%d %k:%i') as startTime,DATE_FORMAT(end_time,'%Y-%m-%d %k:%i') as endTime ,status AS status
+		FROM `sys_banner`
+        where 1=1
+		<if test="type != null">
+			AND type = #{type,jdbcType=VARCHAR}
+		</if>
+        ORDER BY sort DESC
+        limit  ${startIndex}, ${pageSize}
+	</select>
+	<select id="selectBannerNum"  resultType="java.lang.Integer" parameterType="java.lang.String">
+        select COUNT(1) FROM sys_banner WHERE 1=1  AND type=#{type}
+	</select>
+	<select id="selectByPrimary" parameterType="java.lang.Integer" resultType="com.manage.model.product.Banner">
+		SELECT id ,jump_url as JumpUrl ,title,subTitle,image_url AS imageUrl ,create_time as createTime,start_time as startTime,end_time as endTime  FROM `sys_banner`
+		where 1=1 and is_deleted=0
+		<if test="_parameter != null">
+			AND id = #{id}
+		</if>
+
+	</select>
+	<insert id="insertBanner" parameterType="com.manage.model.product.Banner">
+		insert into sys_banner
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="jumpUrl != null">
+				jump_url,
+			</if>
+			<if test="subTitle != null">
+				subTitle,
+			</if>
+			<if test="title != null">
+				title,
+			</if>
+			<if test="imageUrl != null">
+				image_url,
+			</if>
+			<if test="type != null">
+				type,
+			</if>
+			<if test="sort != null">
+				sort,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="startTime != null">
+				start_time,
+			</if>
+			<if test="endTime != null">
+				end_time,
+			</if>
+			<if test="createTime != null">
+				create_time,
+			</if>
+			<if test="updateTime != null">
+				update_time,
+			</if>
+			<if test="createor != null">
+				creator,
+			</if>
+			<if test="updateor != null">
+				updator,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="jumpUrl != null">
+				#{jumpUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="title != null">
+				#{title,jdbcType=VARCHAR},
+			</if>
+			<if test="subTitle != null">
+				#{subTitle,jdbcType=VARCHAR},
+			</if>
+			<if test="imageUrl != null">
+				#{imageUrl,jdbcType=VARCHAR},
+			</if>
+			<if test="type != null">
+				#{type,jdbcType=TINYINT},
+			</if>
+			<if test="sort != null">
+				#{sort,jdbcType=INTEGER},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=TINYINT},
+			</if>
+			<if test="startTime != null">
+				#{startTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="endTime != null">
+				#{endTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="createTime != null">
+				#{createTime,jdbcType=TIMESTAMP},
+			</if>
+			<if test="updateTime != null">
+				#{NOW(),jdbcType=TIMESTAMP},
+			</if>
+			<if test="createor != null">
+				#{createor,jdbcType=VARCHAR},
+			</if>
+			<if test="updateor != null">
+				#{updateor,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+	<select id="selectBannerMaxSort" resultType="java.lang.Integer" parameterType="java.lang.String">
+		select max(sort) from sys_banner WHERE type=#{type}
+	</select>
+	<select id="selectBannerold" resultType="com.manage.model.product.Banner" parameterType="com.manage.model.product.Banner">
+		SELECT id ,jump_url as JumpUrl,title,subTitle,image_url AS imageUrl ,DATE_FORMAT(start_time,'%Y-%m-%d %k:%i:%s') as startTime,DATE_FORMAT(end_time,'%Y-%m-%d %k:%i:%s') as endTime  FROM `sys_banner`
+		where 1=1 AND type = #{activityType} AND id=#{id}
+	</select>
+	<update id="updataBanner" parameterType="com.manage.model.product.Banner">
+		update sys_banner
+        SET
+        start_time=#{startTime},
+        end_time=#{endTime},
+        jump_url=#{jumpUrl},
+        image_url=#{imageUrl},
+        updator=#{updateor},
+        title=#{title},
+        subTitle=#{subTitle},
+        description=#{description}
+        WHERE id=#{id}
+	</update>
+	<select id="selectMaxSort" parameterType="java.lang.String" resultType="java.lang.String">
+          SELECT MAX(sort) from sys_banner WHERE type=#{type}
+	</select>
+	<select id="selectMinSort" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT Min(sort) from sys_banner WHERE type=#{type}
+	</select>
+	<select id="selectById" parameterType="com.manage.model.product.Banner" resultType="java.lang.String">
+        SELECT sort from sys_banner where id=#{id}
+	</select>
+	<select id="selectBySort" parameterType="com.manage.model.product.Banner" resultType="com.manage.model.product.Banner">
+		SELECT id ,sort from sys_banner WHERE sort&lt;#{sort}  AND type=#{activityType}  ORDER BY sort DESC LIMIT 1
+	</select>
+	<select id="selectByToSort" parameterType="com.manage.model.product.Banner" resultType="com.manage.model.product.Banner">
+		SELECT id ,sort from sys_banner WHERE sort>#{sort}  AND type=#{activityType}  ORDER BY sort  LIMIT 1
+	</select>
+	<update id="updateSortUpById" parameterType="com.manage.model.product.Banner">
+		update sys_banner
+		set sort = #{sort},
+		updator = #{updateor},
+		update_time = now()
+		where id = #{id}
+	</update>
+	<select id="selectAppSum" parameterType="java.lang.Integer" resultType="java.lang.String">
+		SELECT COUNT(1) FROM `sys_banner`where is_deleted=0 and `status`=0  and type=#{type}
+	</select>
+	<select id="selectExpectSum" parameterType="java.lang.Integer" resultType="java.lang.String">
+		SELECT COUNT(1) FROM `sys_banner`where is_deleted=0  and `status`=1 and type=#{type} AND start_time>NOW() AND end_time>NOW()
+	</select>
+
+	<update id="updateStatusToOnline" parameterType="com.manage.model.product.Banner">
+		update sys_banner
+		set status=0
+		where start_time &lt;=now() and end_time >= now() and is_deleted=0
+	</update>
+	<update id="updateStatusToOffline" parameterType="com.manage.model.product.Banner">
+		update sys_banner
+		set status=1
+		where end_time &lt; now()  and is_deleted=0
+	</update>
+</mapper>

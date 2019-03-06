@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.withdrawCash.WithdrawCashMapper">
+
+
+    <sql id="withdrawCashColumn">
+        withdraw_cash_id,biz_user_id,realname,id_card_no,bank_card_no,
+        open_card,cellphone,withdraw_status,create_time,update_time
+    </sql>
+    <select id="selectWithdrawCashList"  resultType="com.manage.model.withdrawCash.WithdrawCash">
+        select  <include refid="withdrawCashColumn" />   from withdraw_cash where is_deleted=0
+    </select>
+    <select id="selectWithdrawCashById"  parameterType="java.lang.Integer" resultType="com.manage.model.withdrawCash.WithdrawCash">
+        select  <include refid="withdrawCashColumn" />   from withdraw_cash where withdraw_cash_id =#{withdrawCashId}
+    </select>
+    <update id="updateWithdrawCash" parameterType="com.manage.model.withdrawCash.WithdrawCash">
+        update withdraw_cash
+        SET
+        realname=#{realname},id_card_no=#{idCardNo},
+        bank_card_no=#{bankCardNo},open_card=#{openCard},
+        cellphone=#{cellphone},withdraw_status=#{withdrawStatus},update_time=#{updateTime}
+        WHERE withdraw_cash_id=#{withdrawCashId}
+    </update>
+    <update id="deleteWithdrawCash" parameterType="com.manage.model.withdrawCash.WithdrawCash">
+        update withdraw_cash
+        SET
+        is_deleted=1
+        WHERE withdraw_cash_id=#{withdrawCashId}
+    </update>
+
+    <insert id="insertWithdrawCash" parameterType="com.manage.model.withdrawCash.WithdrawCash">
+        INSERT INTO withdraw_cash( biz_user_id,realname,id_card_no,bank_card_no,open_card,cellphone,withdraw_status,create_time,update_time)
+        values(#{bizUserId},#{realname}, #{idCardNo},#{bankCardNo},#{openCard},#{cellphone},#{withdrawStatus},#{createTime},#{updateTime})
+    </insert>
+
+</mapper>

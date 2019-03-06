@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.user.UserListMapper">
+    <resultMap id="BaseResultMap" type="com.manage.model.user.UserList">
+        <id column="id"  property="id"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="user_name"  property="userName"/>
+        <result column="mobile"  property="phone"/>
+        <result column="channel_id"  property="channelId"/>
+        <result column="totalInvest"  property="totalInvest"/>
+        <result column="onlineInvest"  property="onlineInvest"/>
+        <result column="firstInvestAmount"  property="firstInvestAmount"/>
+        <result column="firstInvestTime"  property="firstInvestTime"/>
+        <result column="secondInvestAmount" property="secondInvestAmount"/>
+        <result column="secondInvestTime" property="secondInvestTime"/>
+        <result column="investCount"  property="investCount"/>
+        <result column="withdrawAmount" property="withdrawAmount"/>
+        <result column="withdrawCount" property="withdrawCount"/>
+        <result column="tranAmount" property="tranAmount"/>
+    </resultMap>
+
+	<sql id="selectUserCondition">
+		<if test="userName != null and userName!='' ">
+			AND u.user_name = #{userName}
+		</if>
+
+		<if test="phone != null and phone != ''">
+			AND u.mobile = #{phone}
+		</if>
+		<if test="startTime !=null and startTime !=''" >
+			and u.create_time>=#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''" >
+			and u.create_time &lt;=#{endTime}
+		</if>
+
+	</sql>
+    <select id="selectUserList" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s') createTime,
+		u.id id,
+		REPLACE(u.mobile, SUBSTR(u.mobile,4,4), '****') phone,
+		u.channel_id channelId,
+		u.user_name userName
+		from user u
+		INNER JOIN (
+		SELECT DISTINCT user_id FROM (
+		SELECT DISTINCT user_id FROM invest tmp1 WHERE tmp1.is_deleted=0
+		UNION
+		SELECT DISTINCT user_id FROM invest_plan tmp2 WHERE tmp2.is_deleted=0
+		) tmp
+		) it ON u.id=it.user_id
+		LEFT JOIN account a on a.user_id=u.id
+		where 1=1
+		and a.account_type=1
+		and u.id &lt;>'00000000-0000-0000-0000-000000000001'
+		AND u.id &lt;> '15622e40-d1aa-48a9-8491-01fa10dcf56f'
+		AND u.id &lt;> '327cc2a6-2bf0-49ae-926a-99e04c84e15c'
+		<include refid="selectUserCondition"/>
+		order by u.create_time desc
+
+    </select>
+
+	<select id="selectUserListGL" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s') createTime,
+		u.id id,
+		REPLACE(u.mobile, SUBSTR(u.mobile,4,4), '****') phone,
+		u.channel_id channelId,
+		u.user_name userName
+		from user u
+		INNER JOIN (
+		SELECT DISTINCT user_id FROM (
+		SELECT DISTINCT user_id FROM invest tmp1 WHERE tmp1.is_deleted=0
+		UNION
+		SELECT DISTINCT user_id FROM invest_plan tmp2 WHERE tmp2.is_deleted=0
+		) tmp
+		) it ON u.id=it.user_id
+		LEFT JOIN account a on a.user_id=u.id
+		INNER JOIN channel_dictionary dc on dc.id = u.channel_id and dc.is_deleted = 0 and dc.parent_id = 452 and dc.`level`  = 2
+		where 1=1
+		and a.account_type=1
+		and u.id &lt;>'00000000-0000-0000-0000-000000000001'
+		AND u.id &lt;> '15622e40-d1aa-48a9-8491-01fa10dcf56f'
+		AND u.id &lt;> '327cc2a6-2bf0-49ae-926a-99e04c84e15c'
+		<include refid="selectUserCondition"/>
+		order by u.create_time desc
+
+	</select>
+
+	<select id="selectUserInfoList" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s') createTime,
+		u.id id,
+		 u.mobile  phone,
+		u.channel_id channelId,
+		c.remarks channelName,
+		u.user_name userName,
+		a.status
+		from user u
+
+		LEFT JOIN account a on a.user_id=u.id
+		LEFT JOIN channel_dictionary c ON c.id = u.channel_id
+		where 1=1
+		and a.account_type&lt;>0
+		and u.id &lt;>'00000000-0000-0000-0000-000000000001'
+		AND u.id &lt;> '15622e40-d1aa-48a9-8491-01fa10dcf56f'
+		AND u.id &lt;> '327cc2a6-2bf0-49ae-926a-99e04c84e15c'
+		<if test="userName != null and userName!='' ">
+			AND u.user_name = #{userName}
+		</if>
+
+		<if test="phone != null and phone != ''">
+			AND u.mobile = #{phone}
+		</if>
+		<if test="startTime !=null and startTime !=''" >
+
+			and DATE_FORMAT(u.create_time,'%Y-%m-%d')>=#{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''" >
+			and DATE_FORMAT(u.create_time,'%Y-%m-%d') &lt;=#{endTime}
+		</if>
+		order by u.create_time desc
+
+	</select>
+	<select id="selectUserListExp" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s')  createTime,
+		u.id id,
+		REPLACE(u.mobile, SUBSTR(u.mobile,4,4), '****') phone,
+
+		u.channel_id channelId,
+		u.user_name userName,
+		tt1.totalInvest,tt1.onlineInvest,tt1.investCount,
+
+		(
+		SELECT firstInvestAmount FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount  ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestAmount,
+		(
+		SELECT firstInvestTime FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount  ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestTime,
+
+
+
+		(
+		SELECT secondInvestAmount FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestAmount,
+		(
+		SELECT secondInvestTime FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestTime
+
+		,tt2.withdrawAmount/100 withdrawAmount ,tt2.withdrawCount,
+		(
+
+		SELECT
+		(
+		SELECT
+		SUM(t2.total_amount) amount
+		FROM
+		invest t2
+		WHERE
+		t2.is_deleted = 0
+		AND t2.user_id =u.id
+
+		) +
+		(
+		SELECT
+		SUM(t2.total_amount) amount
+		FROM
+		invest_plan t2
+		WHERE
+		t2.is_deleted = 0
+		AND t2.user_id =u.id
+
+		)
+		+ (
+		SELECT
+		IFNULL(SUM(total_amount), 0) amount
+
+		FROM
+		finance_product
+		WHERE
+		is_deleted = 0
+		and `org_Id` IS NULL
+		AND user_id =u.id
+		AND product_type = 1
+
+		)
+
+		)/100 tranAmount
+
+
+
+		FROM user u
+		INNER JOIN (
+		SELECT DISTINCT user_id FROM (
+		SELECT DISTINCT user_id   FROM invest  tmp1 WHERE tmp1.is_deleted=0
+		UNION
+		SELECT DISTINCT  user_id    FROM invest_plan tmp2 WHERE tmp2.is_deleted=0
+		) tmp
+		) it ON u.id=it.user_id
+
+		INNER JOIN account ac ON ac.`user_id`=u.id
+
+		LEFT JOIN
+		(
+
+		SELECT user_id,SUM(amount) onlineInvest ,SUM(total_amount) totalInvest ,COUNT(1) investCount FROM (
+		SELECT iv.`amount`,iv.`total_amount`,iv.`user_id` FROM invest iv WHERE iv.`is_deleted`=0
+		UNION ALL
+		SELECT ivp.`amount`,ivp.`total_amount`,ivp.`user_id` FROM invest_plan ivp WHERE ivp.is_deleted=0
+		)invall GROUP BY user_id
+		) tt1 ON tt1.user_id=u.id
+
+		LEFT JOIN
+		(
+		SELECT tr.`user_id`,SUM(tr.`amount`) withdrawAmount ,COUNT(1) withdrawCount FROM transaction_plan tr WHERE tr.`is_deleted`=0 AND tr.`status`=1 AND tr.`transaction_type`=1 GROUP BY tr.`user_id`
+		)tt2 ON tt2.user_id=u.id
+
+		WHERE 1=1
+
+		AND ac.account_type = 1 <include refid="selectUserCondition"/>
+		ORDER BY u.create_time DESC
+
+	</select>
+
+
+
+
+	<select id="getFirstInvestInfo" resultType="com.manage.model.user.UserList" parameterType="java.lang.String">
+          SELECT firstInvestAmount,firstInvestTime  firstInvestTime,firstType FROM (
+				SELECT t1.`total_amount`/100 firstInvestAmount  ,t1.`create_time` firstInvestTime, case when TYPE = 2 then 2 else 1 end  as firstType   FROM invest t1 WHERE t1.`is_deleted`=0 AND t1.`user_id`=#{id}
+				UNION ALL
+				SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,pc.back_type AS firstType FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id WHERE pc.is_deleted = 0 AND t1.`is_deleted` = 0 AND t1.`user_id`=#{id}
+				) tt ORDER BY firstInvestTime  LIMIT 0,1;
+	</select>
+
+	<select id="getSecondInvestInfo" resultType="com.manage.model.user.UserList" parameterType="java.lang.String">
+		SELECT * FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime, case when TYPE = 2 then 2 else 1 end  as secondType  FROM invest t1 WHERE t1.`is_deleted`=0 AND t1.`user_id`=#{id}
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime ,pc.back_type AS firstType FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id WHERE pc.is_deleted = 0 AND t1.`is_deleted`=0 AND t1.`user_id`=#{id}
+		) tt ORDER BY secondInvestTime  LIMIT 1,1;
+	</select>
+	<select id="selectInvestCount"  resultType="java.lang.String" parameterType="java.lang.String">
+		SELECT
+      (SELECT
+		COUNT(1) couInvest
+		FROM
+		invest_plan i2 WHERE i2.is_deleted=0 AND i2.user_id=#{id})
+   +(
+    SELECT
+		COUNT(1) couInvest
+		FROM
+		invest t2 WHERE t2.is_deleted=0 and t2.user_id=#{id}
+)AS investCount
+	</select>
+	
+	<select id="selectUserSumExp" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s') createTime,
+		u.id id,
+		u.mobile phone,
+		u.user_name userName,
+		u.channel_id channelId,
+		case when ccl1.remarks is null then ccp1.remarks else ccl1.remarks end channelParentName,
+		case when ccl2.remarks is null  then '' else ccl2.remarks end channelName,
+		tt2.rechargeAmount/100 rechargeAmount,
+		tt1.onlineInvest ,
+		tt1.investCount,
+		(
+		SELECT firsttype FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id ,case when TYPE = 2 then '新手'  else '活期' end as firsttype FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id ,(case pc.back_type
+		when 0 then '灵活'
+		when 2 then '新手'
+		when 4 then '安心三月'
+		when 5 then '安心六月'
+		else ''
+		end
+		) as firsttype FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id
+		WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstType,
+		(
+		SELECT firstInvestAmount FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestAmount,
+
+		(
+		SELECT firstInvestTime FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestTime,
+
+
+		(
+		SELECT secondtype FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id ,case when TYPE = 2 then '新手' else '活期' end  as secondtype FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id , (case pc.back_type
+		when 0 then '灵活'
+		when 2 then '新手'
+		when 4 then '安心三月'
+		when 5 then '安心六月'
+		else ''
+		end
+		) as secondtype FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id WHERE pc.is_deleted = 0 AND  t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondType,
+		(
+		SELECT secondInvestAmount FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestAmount,
+		(
+		SELECT secondInvestTime FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestTime,
+
+
+		inp.regularInvest,
+		inp.safeMatch,
+		inp.safeJune,
+		nov.noviceInvest,
+		inv.currentInvest,
+		tt3.withdrawAmount/100 withdrawAmount ,
+		tt3.withdrawCount,
+		ff.transferAmount,
+		tt1.totalInvest
+
+
+
+		FROM user u
+		INNER JOIN (
+		SELECT DISTINCT user_id FROM (
+		SELECT DISTINCT user_id   FROM invest  tmp1 WHERE tmp1.is_deleted=0
+		UNION
+		SELECT DISTINCT  user_id    FROM invest_plan tmp2 WHERE tmp2.is_deleted=0
+		) tmp
+		) it ON u.id=it.user_id
+
+		INNER JOIN account ac ON ac.`user_id`=u.id
+
+		LEFT JOIN
+		(
+
+		SELECT user_id ,ROUND(SUM(amount/100),2) onlineInvest,IFNULL( ROUND(SUM(total_amount)/100,2),0) totalInvest ,COUNT(1) investCount FROM (
+		SELECT iv.`amount`,iv.`total_amount`,iv.`user_id` FROM invest iv WHERE iv.`is_deleted`=0
+		UNION ALL
+		SELECT ivp.`amount`,ivp.`total_amount`,ivp.`user_id` FROM invest_plan ivp WHERE ivp.is_deleted=0
+		)invall GROUP BY user_id
+		) tt1 ON tt1.user_id=u.id
+
+		LEFT JOIN
+		(
+		SELECT tr.`user_id`,SUM(tr.`amount`) rechargeAmount  FROM transaction_plan tr WHERE tr.`is_deleted`=0 AND tr.`status`=1 AND tr.`transaction_type`=0 GROUP BY tr.`user_id`
+		)tt2 ON tt2.user_id=u.id
+
+		LEFT JOIN
+		(
+		SELECT tr.`user_id`,SUM(tr.`amount`) withdrawAmount ,COUNT(1) withdrawCount FROM transaction_plan tr WHERE tr.`is_deleted`=0 AND tr.`status`=1 AND tr.`transaction_type`=1 GROUP BY tr.`user_id`
+		)tt3 ON tt3.user_id=u.id
+		LEFT JOIN channel_dictionary ccl1 ON ccl1.id = u.channel_id and ccl1.`level` = 1 and ccl1.is_deleted = 0
+		LEFT JOIN channel_dictionary ccl2 ON ccl2.id = u.channel_id and ccl2.`level` = 2 and ccl2.is_deleted = 0
+		LEFT JOIN channel_dictionary ccp1 ON ccp1.id = ccl2.parent_id and ccp1.is_deleted = 0
+		LEFT JOIN(
+		SELECT ip.user_id,
+		IFNULL( ROUND(SUM(case when back_type=0 then amount ELSE 0 end)/100,2),0) as regularInvest,
+		IFNULL( ROUND(SUM(case when back_type=4 then amount ELSE 0 end)/100,2),0) as safeMatch,
+		IFNULL( ROUND(SUM(case when back_type=5 then amount ELSE 0 end)/100,2),0) as safeJune
+		FROM
+		invest_plan ip
+		INNER JOIN product_config pc ON ip.product_id = pc.id
+		WHERE
+		ip.is_deleted = 0
+		and pc.is_deleted = 0 GROUP BY ip.user_id
+		)inp on inp.user_id=u.id
+		LEFT JOIN(
+		SELECT user_id,
+		IFNULL( ROUND(SUM(case when TYPE = 1 then total_amount else 0 end)/100,2),0) as currentInvest
+		FROM
+		invest
+		WHERE
+		is_deleted = 0 GROUP BY user_id
+		)inv  on inv.user_id=u.id
+		LEFT JOIN(
+		select user_id,sum(investamount) noviceInvest from(SELECT
+		t.user_id user_id,
+		IFNULL(
+		ROUND(SUM(t.total_amount) / 100, 2),
+		0
+		) investamount
+		FROM
+		invest t
+		WHERE
+		1 = 1
+		AND t.is_deleted = 0
+		and t.type=2
+		GROUP BY user_id
+		union
+		SELECT
+		t.user_id user_id,
+		IFNULL(
+		ROUND(SUM(t.total_amount) / 100, 2),
+		0
+		) investamount
+		FROM
+		invest_plan t
+		WHERE
+		1 = 1
+		AND t.is_deleted = 0
+		and t.type=2
+		GROUP BY user_id
+		)aa GROUP BY user_id
+		)nov  on nov.user_id=u.id
+		LEFT JOIN(
+		SELECT t.user_id ,IFNULL(ROUND(sum(amount)/100,2),0) transferAmount FROM finance_product t WHERE t.`product_type` = 1 and t.`org_Id` IS NULL AND t.`is_deleted` = 0 AND t.`status` = 7  GROUP BY user_id
+		)ff on ff.user_id=u.id
+		WHERE 1=1
+        and u.id &lt;>'00000000-0000-0000-0000-000000000001'
+		AND u.id &lt;> '15622e40-d1aa-48a9-8491-01fa10dcf56f'
+		AND u.id &lt;> '327cc2a6-2bf0-49ae-926a-99e04c84e15c'
+		AND ac.account_type = 1    <include refid="selectUserCondition"/>
+		ORDER BY u.create_time DESC
+
+	</select>
+	
+	<select id="searchChannelById">
+		SELECT channel_dictionary.remarks,channel_dictionary.id,c.id,c.`name` ,c.`level`,c.remarks
+		FROM (select * FROM channel_dictionary where id = #{id} )c
+		left join channel_dictionary  
+		ON channel_dictionary.id = c.parent_id
+	</select>
+
+	<select id="selectUserSumExpGL" resultType="com.manage.model.user.UserList" parameterType="com.manage.model.user.UserList">
+		SELECT
+		DATE_FORMAT(u.create_time,'%Y-%m-%d %k:%i:%s') createTime,
+		u.id id,
+		u.mobile phone,
+		u.user_name userName,
+		u.channel_id channelId,
+		case when ccl1.remarks is null then ccp1.remarks else ccl1.remarks end channelParentName,
+		case when ccl2.remarks is null  then '' else ccl2.remarks end channelName,
+		tt2.rechargeAmount/100 rechargeAmount,
+		tt1.onlineInvest ,
+		tt1.investCount,
+		(
+		SELECT firsttype FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id ,case when TYPE = 2 then '新手'  else '活期' end as firsttype FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id ,(case pc.back_type
+		when 0 then '灵活'
+		when 2 then '新手'
+		when 4 then '安心三月'
+		when 5 then '安心六月'
+		else ''
+		end
+		) as firsttype FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id
+		WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstType,
+		(
+		SELECT firstInvestAmount FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestAmount,
+
+		(
+		SELECT firstInvestTime FROM (
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 firstInvestAmount ,t1.`create_time` firstInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY firstInvestTime  LIMIT 0,1
+		) firstInvestTime,
+
+
+		(
+		SELECT secondtype FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id ,case when TYPE = 2 then '新手' else '活期' end  as secondtype FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id , (case pc.back_type
+		when 0 then '灵活'
+		when 2 then '新手'
+		when 4 then '安心三月'
+		when 5 then '安心六月'
+		else ''
+		end
+		) as secondtype FROM invest_plan t1 INNER JOIN product_config pc ON t1.product_id = pc.id WHERE pc.is_deleted = 0 AND  t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondType,
+		(
+		SELECT secondInvestAmount FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestAmount,
+		(
+		SELECT secondInvestTime FROM (
+		SELECT t1.`total_amount`/100 secondInvestAmount  ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest t1 WHERE t1.`is_deleted`=0
+		UNION ALL
+		SELECT t1.`total_amount`/100 secondInvestAmount ,t1.`create_time` secondInvestTime,t1.user_id  FROM invest_plan t1 WHERE t1.`is_deleted`=0
+		) tt WHERE tt.user_id=u.id  ORDER BY secondInvestTime  LIMIT 1,1
+		) secondInvestTime,
+
+
+		inp.regularInvest,
+		inp.safeMatch,
+		inp.safeJune,
+		inp.safeTwelve,
+		nov.noviceInvest,
+		inv.currentInvest,
+		tt3.withdrawAmount/100 withdrawAmount ,
+		tt3.withdrawCount,
+		ff.transferAmount,
+		tt1.totalInvest
+
+
+
+		FROM user u
+		INNER JOIN (
+		SELECT DISTINCT user_id FROM (
+		SELECT DISTINCT user_id   FROM invest  tmp1 WHERE tmp1.is_deleted=0
+		UNION
+		SELECT DISTINCT  user_id    FROM invest_plan tmp2 WHERE tmp2.is_deleted=0
+		) tmp
+		) it ON u.id=it.user_id
+
+		INNER JOIN account ac ON ac.`user_id`=u.id
+
+		LEFT JOIN
+		(
+
+		SELECT user_id ,ROUND(SUM(amount/100),2) onlineInvest,IFNULL( ROUND(SUM(total_amount)/100,2),0) totalInvest ,COUNT(1) investCount FROM (
+		SELECT iv.`amount`,iv.`total_amount`,iv.`user_id` FROM invest iv WHERE iv.`is_deleted`=0
+		UNION ALL
+		SELECT ivp.`amount`,ivp.`total_amount`,ivp.`user_id` FROM invest_plan ivp WHERE ivp.is_deleted=0
+		)invall GROUP BY user_id
+		) tt1 ON tt1.user_id=u.id
+
+		LEFT JOIN
+		(
+		SELECT tr.`user_id`,SUM(tr.`amount`) rechargeAmount  FROM transaction_plan tr WHERE tr.`is_deleted`=0 AND tr.`status`=1 AND tr.`transaction_type`=0 GROUP BY tr.`user_id`
+		)tt2 ON tt2.user_id=u.id
+
+		LEFT JOIN
+		(
+		SELECT tr.`user_id`,SUM(tr.`amount`) withdrawAmount ,COUNT(1) withdrawCount FROM transaction_plan tr WHERE tr.`is_deleted`=0 AND tr.`status`=1 AND tr.`transaction_type`=1 GROUP BY tr.`user_id`
+		)tt3 ON tt3.user_id=u.id
+		LEFT JOIN channel_dictionary ccl1 ON ccl1.id = u.channel_id and ccl1.`level` = 1 and ccl1.is_deleted = 0
+		LEFT JOIN channel_dictionary ccl2 ON ccl2.id = u.channel_id and ccl2.`level` = 2 and ccl2.is_deleted = 0
+		LEFT JOIN channel_dictionary ccp1 ON ccp1.id = ccl2.parent_id and ccp1.is_deleted = 0
+		INNER JOIN channel_dictionary dc on dc.id = u.channel_id and dc.is_deleted = 0 and dc.parent_id = 452 and dc.`level`  = 2
+		LEFT JOIN(
+		SELECT ip.user_id,
+		IFNULL( ROUND(SUM(case when back_type=0 then amount ELSE 0 end)/100,2),0) as regularInvest,
+		IFNULL( ROUND(SUM(case when back_type=4 then amount ELSE 0 end)/100,2),0) as safeMatch,
+		IFNULL( ROUND(SUM(case when back_type=5 then amount ELSE 0 end)/100,2),0) as safeJune,
+		IFNULL( ROUND(SUM(case when back_type=6 then amount ELSE 0 end)/100,2),0) as safeTwelve
+		FROM
+		invest_plan ip
+		INNER JOIN product_config pc ON ip.product_id = pc.id
+		WHERE
+		ip.is_deleted = 0
+		and pc.is_deleted = 0 GROUP BY ip.user_id
+		)inp on inp.user_id=u.id
+		LEFT JOIN(
+		SELECT user_id,
+		IFNULL( ROUND(SUM(case when TYPE = 1 then total_amount else 0 end)/100,2),0) as currentInvest
+		FROM
+		invest
+		WHERE
+		is_deleted = 0 GROUP BY user_id
+		)inv  on inv.user_id=u.id
+		LEFT JOIN(
+		select user_id,sum(investamount) noviceInvest from(SELECT
+		t.user_id user_id,
+		IFNULL(
+		ROUND(SUM(t.total_amount) / 100, 2),
+		0
+		) investamount
+		FROM
+		invest t
+		WHERE
+		1 = 1
+		AND t.is_deleted = 0
+		and t.type=2
+		GROUP BY user_id
+		union
+		SELECT
+		t.user_id user_id,
+		IFNULL(
+		ROUND(SUM(t.total_amount) / 100, 2),
+		0
+		) investamount
+		FROM
+		invest_plan t
+		WHERE
+		1 = 1
+		AND t.is_deleted = 0
+		and t.type=2
+		GROUP BY user_id
+		)aa GROUP BY user_id
+		)nov  on nov.user_id=u.id
+		LEFT JOIN(
+		SELECT t.user_id ,IFNULL(ROUND(sum(amount)/100,2),0) transferAmount FROM finance_product t WHERE t.`product_type` = 1 and t.`org_Id` IS NULL AND t.`is_deleted` = 0 AND t.`status` = 7  GROUP BY user_id
+		)ff on ff.user_id=u.id
+		WHERE 1=1
+		and u.id &lt;>'00000000-0000-0000-0000-000000000001'
+		AND u.id &lt;> '15622e40-d1aa-48a9-8491-01fa10dcf56f'
+		AND u.id &lt;> '327cc2a6-2bf0-49ae-926a-99e04c84e15c'
+		AND ac.account_type = 1    <include refid="selectUserCondition"/>
+		ORDER BY u.create_time DESC
+
+	</select>
+
+</mapper>

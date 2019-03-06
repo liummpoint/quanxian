@@ -77,7 +77,7 @@
     <input type="hidden" name="activityType" id="activityType" value="1"/>
     <div id="tab_demo" class="HuiTab">
 
-        <div class="tabBar clearfix"><span>运营商积分</span><span>信用卡积分</span><span>申请信用卡</span></div>
+        <div class="tabBar clearfix"><span>运营商积分</span><span>信用卡积分</span><span>银行信用卡</span></div>
         APP已上线数量：<b id="number1">0</b>&nbsp;&nbsp;&nbsp;预计上线数量：<b id="number2">0</b>&nbsp;&nbsp;&nbsp;<button
             class="btn btn-primary radius" onclick="insert()"> 新增
     </button>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.manage.dao.product.ProductActivity">
+
+
+    <sql id="withdrawCashColumn">
+        product_activity_id,product_id,activity_picture,introduction,end_time,
+        distribute_ratio,share_pic,withdraw_status,create_time,update_time
+    </sql>
+    <select id="selectProductActivityList"  resultType="com.manage.model.product.ProductActivity">
+        select  <include refid="withdrawCashColumn" />   from product_activity where is_deleted=0
+    </select>
+    <select id="selectProductActivityById"  parameterType="java.lang.Integer" resultType="com.manage.model.product.ProductActivity">
+        select  <include refid="productActivityColumn" />   from product_activity where withdraw_cash_id =#{productActivityId}
+    </select>
+    <update id="updateProductActivity" parameterType="com.manage.model.product.ProductActivity">
+        update product_activity
+        SET
+        realname=#{realname},id_card_no=#{idCardNo},
+        bank_card_no=#{bankCardNo},open_card=#{openCard},
+        cellphone=#{cellphone},withdraw_status=#{withdrawStatus},update_time=#{updateTime}
+        WHERE withdraw_cash_id=#{productActivityId}
+    </update>
+    <update id="deleteProductActivity" parameterType="com.manage.model.product.ProductActivity">
+        update product_activity
+        SET
+        is_deleted=1
+        WHERE withdraw_cash_id=#{productActivityId}
+    </update>
+
+    <insert id="insertProductActivity" parameterType="com.manage.model.product.ProductActivity">
+        INSERT INTO product_activity( biz_user_id,realname,id_card_no,bank_card_no,open_card,cellphone,withdraw_status,create_time,update_time)
+        values(#{bizUserId},#{realname}, #{idCardNo},#{bankCardNo},#{openCard},#{cellphone},#{withdrawStatus},#{createTime},#{updateTime})
+    </insert>
+
+</mapper>
